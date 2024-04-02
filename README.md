@@ -1,1 +1,3 @@
-# dnd-telegram-bot
+# D&D Telegram Bot
+
+Чат-бот сообщества НРИ 
