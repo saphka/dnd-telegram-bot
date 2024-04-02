@@ -1,0 +1,5 @@
+---
+- name: "Setup Database Server"
+  hosts: db
+  roles:
+    - roles/db

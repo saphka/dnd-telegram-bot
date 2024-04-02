@@ -1,0 +1,15 @@
+[Unit]
+Description=DnD Manager Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/dnd-bot
+EnvironmentFile=/etc/sysconfig/dnd-bot
+ExecStart=java -jar /opt/dnd-bot/telegram-dnd-bot.jar
+Restart=on-failure
+User=telegram
+Group=telegram
+
+[Install]
+WantedBy=multi-user.target

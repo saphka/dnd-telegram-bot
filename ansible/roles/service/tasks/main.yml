@@ -1,0 +1,60 @@
+---
+# tasks file for roles/software
+- include_vars: secrets.yml
+  tags: always
+- include_vars: ../../db/vars/secrets.yml
+  tags: always
+- name: install openjdk
+  become: true
+  apt:
+    name: openjdk-17-jdk
+    update_cache: yes
+  tags: [ never, setup ]
+- name: create service group
+  become: true
+  group:
+    name: telegram
+  tags: [ never, setup ]
+- name: create service user
+  become: true
+  user:
+    name: telegram
+    group: telegram
+  tags: [ never, setup ]
+- name: create directory
+  become: true
+  file:
+    path: /etc/sysconfig
+    state: directory
+- name: copy env file
+  become: true
+  template:
+    src: systemd/dnd-bot.j2
+    dest: "/etc/sysconfig/dnd-bot"
+    mode: '600'
+    owner: root
+- name: copy service files
+  become: true
+  template:
+    src: systemd/dnd-bot.service.j2
+    dest: "/etc/systemd/system/dnd-bot.service"
+  notify: restart systemd
+- name: create bot directory
+  become: true
+  file:
+    path: /opt/dnd-bot
+    state: directory
+    owner: telegram
+- name: copy jar files
+  become: true
+  copy:
+    src: "telegram-dnd-bot.jar"
+    dest: "/opt/dnd-bot/telegram-dnd-bot.jar"
+    owner: telegram
+  notify: restart bot
+- name: enable and start services
+  become: true
+  service:
+    name: dnd-bot
+    enabled: yes
+    state: started

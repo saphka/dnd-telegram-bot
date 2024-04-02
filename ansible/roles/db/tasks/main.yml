@@ -1,0 +1,53 @@
+---
+# tasks file for db
+- include_vars: secrets.yml
+  tags: always
+- name: add postgres repo
+  become: true
+  apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main
+    update_cache: false
+  tags: [ never, setup ]
+- name: add postgres repo key
+  become: true
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+  tags: [ never, setup ]
+- name: install postgres
+  become: true
+  apt:
+    name: postgresql-13
+    update_cache: yes
+  tags: [ never, setup ]
+- name: install acl
+  become: true
+  apt:
+    name: acl
+    update_cache: yes
+  tags: [ never, setup ]
+- name: install pip
+  become: true
+  apt:
+    name: python3-pip
+    update_cache: yes
+  tags: [ never, setup ]
+- name: install psycopg2
+  become: true
+  pip:
+    name: psycopg2-binary
+  tags: [ never, setup ]
+- name: create postgres user
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    role_attr_flags: LOGIN
+  tags: [ never, setup ]
+- name: create postgres databases
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "telegram"
+    owner: "{{ db_user }}"
+  tags: [ never, setup ]

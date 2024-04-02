@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: prod
+  application:
+    name: telegram-dnd-bot
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+bot:
+  path: ""
+  username: FiveXGameBot

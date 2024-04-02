@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      author: saphka
+      id: 20240402_state_machine
+      changes:
+        - createTable:
+            tableName: state_machine
+            columns:
+              - column:
+                  name: machine_id
+                  type: varchar(60)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: state
+                  type: varchar(60)
+              - column:
+                  name: state_machine_context
+                  type: oid

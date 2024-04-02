@@ -1,0 +1,5 @@
+---
+- name: "Setup Application Server"
+  hosts: service
+  roles:
+    - roles/service

@@ -1,0 +1,12 @@
+---
+# handlers file for roles/software
+- name: restart bot service
+  become: true
+  service:
+    name: dnd-bot
+    state: restarted
+  listen: restart bot
+- name: restart systemd deamon
+  become: true
+  shell: systemctl daemon-reload
+  listen: restart systemd
