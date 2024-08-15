@@ -1,5 +1,6 @@
 package ru.x5.dnd.telegrambot.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
@@ -40,9 +41,9 @@ public class TelegramUpdateProcessor {
     }
 
     private StateMachineEvents extractEvent(Message message) {
-        if (!message.getNewChatMembers().isEmpty()) {
+        if (!CollectionUtils.isEmpty(message.getNewChatMembers())) {
             return StateMachineEvents.NEW_MEMBERS;
-        } else if (!message.getEntities().isEmpty()) {
+        } else if (!CollectionUtils.isEmpty(message.getEntities())) {
             var command = message
                     .getEntities()
                     .stream()
