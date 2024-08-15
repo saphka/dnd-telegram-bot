@@ -13,5 +13,4 @@ jobs:
         with:
           java-version: 17
           distribution: adopt
-      - uses: gradle/gradle-build-action@v3
-      - run: ./gradlew test
+      - run: mvn --batch-mode clean test

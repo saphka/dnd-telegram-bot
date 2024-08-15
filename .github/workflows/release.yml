@@ -12,12 +12,11 @@ jobs:
         with:
           java-version: 17
           distribution: adopt
-      - uses: gradle/gradle-build-action@v3
-      - run: ./gradlew build -Papplication.version=${GITHUB_REF##*/}
+      - run: mvn --batch-mode -Drevision=${GITHUB_REF##*/} clean package
       - uses: actions/upload-artifact@v4
         with:
           name: telegram-dnd-bot.jar
-          path: build/libs/telegram-dnd-bot.jar
+          path: target/telegram-dnd-bot.jar
   Deploy:
     runs-on: ubuntu-latest
     steps:
