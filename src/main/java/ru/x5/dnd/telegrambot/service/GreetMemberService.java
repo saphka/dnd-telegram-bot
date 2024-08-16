@@ -53,7 +53,6 @@ public class GreetMemberService {
                     greetByChatId(chatId, users);
                 } catch (TelegramApiException e) {
                     log.error("Cannot greet chat id {}, new members {}", chatId, users, e);
-                } finally {
                     addUsersToGreetings(chatId, users);
                 }
             }

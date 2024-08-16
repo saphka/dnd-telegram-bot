@@ -6,10 +6,11 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.x5.dnd.telegrambot.config.StateMachineEvents;
 import ru.x5.dnd.telegrambot.config.StateMachineStates;
 import ru.x5.dnd.telegrambot.config.TelegramMessageHeaders;
+import ru.x5.dnd.telegrambot.exception.BotLogicException;
 import ru.x5.dnd.telegrambot.service.TelegramService;
 
 @Service
@@ -29,11 +30,18 @@ public class ExceptionHandlerAction implements Action<StateMachineStates, StateM
         if (e != null) {
             log.error("Error occurred when processing update {}", context.getMessageHeader(TelegramMessageHeaders.UPDATE), e);
 
-            var message = (Message) context.getMessageHeader(TelegramMessageHeaders.MESSAGE);
-            SendMessage msg = new SendMessage();
-            msg.setChatId(message.getChatId());
-            msg.setText("Unknown error occurred. Try again later");
-            telegramService.executeAsync(msg);
+            var update = (Update) context.getMessageHeader(TelegramMessageHeaders.UPDATE);
+            if (update.hasMessage()) {
+                var message = update.getMessage();
+                SendMessage msg = new SendMessage();
+                msg.setChatId(message.getChatId());
+                if (e instanceof BotLogicException) {
+                    msg.setText(e.getMessage());
+                } else {
+                    msg.setText("Unknown error occurred. Try again later");
+                }
+                telegramService.executeAsync(msg);
+            }
         }
     }
 }
