@@ -1,6 +1,8 @@
 package ru.x5.dnd.telegrambot.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class GreetMemberService {
 
+    private final static Logger log = LoggerFactory.getLogger(GreetMemberService.class);
+
     public static final int GREETING_DELAY = 30000;
     private final TelegramService telegramService;
     private final MessageSource messageSource;
@@ -27,6 +31,10 @@ public class GreetMemberService {
 
     public void greet(Long chatId, List<User> users) {
         List<String> newUserNames = users.stream().map(User::getUserName).toList();
+        addUsersToGreetings(chatId, newUserNames);
+    }
+
+    private void addUsersToGreetings(Long chatId, Collection<String> newUserNames) {
         greetings.compute(chatId, (chatIdKey, usersValue) -> {
             if (usersValue == null) {
                 usersValue = new HashSet<>();
@@ -41,20 +49,22 @@ public class GreetMemberService {
         for (Long chatId : greetings.keySet()) {
             Set<String> users = greetings.remove(chatId);
             if (CollectionUtils.isNotEmpty(users)) {
-                greetByChatId(chatId, users);
+                try {
+                    greetByChatId(chatId, users);
+                } catch (TelegramApiException e) {
+                    log.error("Cannot greet chat id {}, new members {}", chatId, users, e);
+                } finally {
+                    addUsersToGreetings(chatId, users);
+                }
             }
         }
     }
 
-    private void greetByChatId(Long chatId, Set<String> users) {
+    private void greetByChatId(Long chatId, Set<String> users) throws TelegramApiException {
         var msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText(messageSource.getMessage("greeting.new-member", new Object[]{formatMembers(users)}, Locale.getDefault()));
-        try {
-            telegramService.execute(msg);
-        } catch (TelegramApiException e) {
-            throw new IllegalStateException(e);
-        }
+        telegramService.execute(msg);
     }
 
     private String formatMembers(Set<String> users) {
