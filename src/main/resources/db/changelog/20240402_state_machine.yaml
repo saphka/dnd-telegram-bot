@@ -17,4 +17,4 @@ databaseChangeLog:
                   type: varchar(60)
               - column:
                   name: state_machine_context
-                  type: oid
+                  type: bytea
