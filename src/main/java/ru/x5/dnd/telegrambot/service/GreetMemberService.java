@@ -30,7 +30,7 @@ public class GreetMemberService {
     }
 
     public void greet(Long chatId, List<User> users) {
-        List<String> newUserNames = users.stream().map(User::getUserName).toList();
+        var newUserNames = users.stream().map(User::getUserName).toList();
         addUsersToGreetings(chatId, newUserNames);
     }
 
@@ -47,7 +47,7 @@ public class GreetMemberService {
     @Scheduled(fixedDelay = GREETING_DELAY)
     public void greetDelayed() {
         for (Long chatId : greetings.keySet()) {
-            Set<String> users = greetings.remove(chatId);
+            var users = greetings.remove(chatId);
             if (CollectionUtils.isNotEmpty(users)) {
                 try {
                     greetByChatId(chatId, users);

@@ -26,14 +26,14 @@ public class ExceptionHandlerAction implements Action<StateMachineStates, StateM
 
     @Override
     public void execute(StateContext<StateMachineStates, StateMachineEvents> context) {
-        Exception e = context.getException();
+        var e = context.getException();
         if (e != null) {
             log.error("Error occurred when processing update {}", context.getMessageHeader(TelegramMessageHeaders.UPDATE), e);
 
             var update = (Update) context.getMessageHeader(TelegramMessageHeaders.UPDATE);
             if (update.hasMessage()) {
                 var message = update.getMessage();
-                SendMessage msg = new SendMessage();
+                var msg = new SendMessage();
                 msg.setChatId(message.getChatId());
                 if (e instanceof BotLogicException) {
                     msg.setText(e.getMessage());
