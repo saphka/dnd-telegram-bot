@@ -8,6 +8,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.EntityType;
+import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.x5.dnd.telegrambot.config.CallbackConstants;
 import ru.x5.dnd.telegrambot.config.StateMachineEvents;
@@ -60,7 +61,7 @@ public class TelegramUpdateProcessor {
                         .stream()
                         .filter(e -> EntityType.BOTCOMMAND.equals(e.getType())).findFirst();
                 if (command.isPresent()) {
-                    return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.COMMAND_PREFIX + command.get().getText().toUpperCase().substring(1), StateMachineEvents.UNKNOWN);
+                    return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.COMMAND_PREFIX + extractCommand(command.get()).toUpperCase(), StateMachineEvents.UNKNOWN);
                 }
             } else if (StringUtils.isNotEmpty(message.getText())) {
                 return StateMachineEvents.TEXT_INPUT;
@@ -71,6 +72,15 @@ public class TelegramUpdateProcessor {
             return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.CALLBACK_PREFIX + split[0].toUpperCase(), StateMachineEvents.UNKNOWN);
         }
         return StateMachineEvents.UNKNOWN;
+    }
+
+    private static String extractCommand(MessageEntity command) {
+        var commandTest = command.getText().substring(1);
+        var mentionIndex = commandTest.indexOf('@');
+        if (mentionIndex != -1) {
+            return commandTest.substring(0, mentionIndex);
+        }
+        return commandTest;
     }
 
 
