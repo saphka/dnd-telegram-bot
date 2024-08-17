@@ -4,7 +4,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.x5.dnd.telegrambot.config.StateMachineEvents;
@@ -23,7 +23,8 @@ public class EchoAction implements Action<StateMachineStates, StateMachineEvents
 
     @Override
     public void execute(StateContext<StateMachineStates, StateMachineEvents> context) {
-        var message = (Message) context.getMessageHeader(TelegramMessageHeaders.MESSAGE);
+        var update = (Update) context.getMessageHeader(TelegramMessageHeaders.UPDATE);
+        var message = update.getMessage();
         var msg = new SendMessage();
         msg.setChatId(message.getChatId());
         msg.setText(message.getText());

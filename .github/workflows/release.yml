@@ -19,6 +19,7 @@ jobs:
           path: target/telegram-dnd-bot.jar
   Deploy:
     runs-on: ubuntu-latest
+    environment: springbox
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

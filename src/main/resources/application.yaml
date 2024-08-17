@@ -3,6 +3,8 @@ spring:
     active: prod
   application:
     name: telegram-dnd-bot
+  datasource:
+    url: jdbc:h2:file:./db/bot
   jpa:
     open-in-view: false
     hibernate:

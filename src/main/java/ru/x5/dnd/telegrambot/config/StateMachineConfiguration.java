@@ -20,11 +20,14 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
 
     private final Action<StateMachineStates, StateMachineEvents> echoAction;
     private final Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction;
+    private final Action<StateMachineStates, StateMachineEvents> greetMembersAction;
 
     public StateMachineConfiguration(Action<StateMachineStates, StateMachineEvents> echoAction,
-                                     Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction) {
+                                     Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction,
+                                     Action<StateMachineStates, StateMachineEvents> greetMembersAction) {
         this.echoAction = echoAction;
         this.exceptionHandlerAction = exceptionHandlerAction;
+        this.greetMembersAction = greetMembersAction;
     }
 
     @Override
@@ -42,7 +45,15 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
                 .action(echoAction, exceptionHandlerAction)
                 .and()
                 .withExternal()
-                .source(StateMachineStates.ECHO).target(StateMachineStates.READY);
+                .source(StateMachineStates.ECHO).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.GREET_NEW_MEMBERS)
+                .event(StateMachineEvents.NEW_MEMBERS)
+                .action(greetMembersAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.GREET_NEW_MEMBERS).target(StateMachineStates.READY);
     }
 
     @Bean
