@@ -20,11 +20,20 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
 
     private final Action<StateMachineStates, StateMachineEvents> echoAction;
     private final Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction;
+    private final Action<StateMachineStates, StateMachineEvents> greetMembersAction;
+    private final Action<StateMachineStates, StateMachineEvents> announceAction;
+    private final Action<StateMachineStates, StateMachineEvents> announceCallbackAction;
 
     public StateMachineConfiguration(Action<StateMachineStates, StateMachineEvents> echoAction,
-                                     Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction) {
+                                     Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction,
+                                     Action<StateMachineStates, StateMachineEvents> greetMembersAction,
+                                     Action<StateMachineStates, StateMachineEvents> announceAction,
+                                     Action<StateMachineStates, StateMachineEvents> announceCallbackAction) {
         this.echoAction = echoAction;
         this.exceptionHandlerAction = exceptionHandlerAction;
+        this.greetMembersAction = greetMembersAction;
+        this.announceAction = announceAction;
+        this.announceCallbackAction = announceCallbackAction;
     }
 
     @Override
@@ -38,11 +47,35 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     public void configure(StateMachineTransitionConfigurer<StateMachineStates, StateMachineEvents> transitions) throws Exception {
         transitions.withExternal()
                 .source(StateMachineStates.READY).target(StateMachineStates.ECHO)
-                .event(StateMachineEvents.TEXT_INPUT)
+                .event(StateMachineEvents.COMMAND_ECHO)
                 .action(echoAction, exceptionHandlerAction)
                 .and()
                 .withExternal()
-                .source(StateMachineStates.ECHO).target(StateMachineStates.READY);
+                .source(StateMachineStates.ECHO).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.GREET_NEW_MEMBERS)
+                .event(StateMachineEvents.NEW_MEMBERS)
+                .action(greetMembersAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.GREET_NEW_MEMBERS).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_GAME)
+                .event(StateMachineEvents.COMMAND_ANNOUNCE)
+                .action(announceAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.ANNOUNCE_GAME).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_CALLBACK)
+                .event(StateMachineEvents.CALLBACK_ANNOUNCE)
+                .action(announceCallbackAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.ANNOUNCE_CALLBACK).target(StateMachineStates.READY);
     }
 
     @Bean
