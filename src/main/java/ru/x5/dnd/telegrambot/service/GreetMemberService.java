@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -63,6 +64,7 @@ public class GreetMemberService {
         var msg = new SendMessage();
         msg.setChatId(chatId);
         msg.setText(messageSource.getMessage("greeting.new-member", new Object[]{formatMembers(users)}, Locale.getDefault()));
+        msg.setParseMode(ParseMode.HTML);
         telegramService.execute(msg);
     }
 
