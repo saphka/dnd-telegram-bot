@@ -44,3 +44,5 @@ jobs:
           name: telegram-dnd-bot.jar
           path: ansible/roles/service/files/
       - run: ansible-playbook ansible/setup_server.yml -i ansible/inventory/sprintbox.yml --vault-password-file .ansible_vault_key
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
