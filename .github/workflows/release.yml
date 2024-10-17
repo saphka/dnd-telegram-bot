@@ -34,7 +34,7 @@ jobs:
           ANSIBLE_SSH_KEY: ${{ secrets.ANSIBLE_SSH_KEY }}
           ANSIBLE_VAULT_KEY: ${{ secrets.ANSIBLE_VAULT_KEY }}
         run: |
-          mkdir .ssh
+          mkdir ~/.ssh
           echo "$ANSIBLE_SSH_KEY" > ~/.ssh/ansible
           chmod 600 .ssh/ansible
           echo "$ANSIBLE_VAULT_KEY" > .ansible_vault_key
