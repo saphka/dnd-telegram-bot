@@ -41,7 +41,7 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     public void configure(StateMachineTransitionConfigurer<StateMachineStates, StateMachineEvents> transitions) throws Exception {
         transitions.withExternal()
                 .source(StateMachineStates.READY).target(StateMachineStates.ECHO)
-                .event(StateMachineEvents.TEXT_INPUT)
+                .event(StateMachineEvents.COMMAND_ECHO)
                 .action(echoAction, exceptionHandlerAction)
                 .and()
                 .withExternal()

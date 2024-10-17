@@ -3,8 +3,8 @@ package ru.x5.dnd.telegrambot.config;
 public enum StateMachineEvents {
     TEXT_INPUT,
     NEW_MEMBERS,
-    UNKNOWN_COMMAND,
     COMMAND_ANNOUNCE,
+    COMMAND_ECHO,
 
     UNKNOWN;
 

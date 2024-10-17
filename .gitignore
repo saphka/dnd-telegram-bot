@@ -17,4 +17,4 @@ buildNumber.properties
 .classpath
 
 .idea
-db
+./db/
