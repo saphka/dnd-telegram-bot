@@ -10,6 +10,8 @@ ExecStart=java -jar /opt/dnd-bot/telegram-dnd-bot.jar
 Restart=on-failure
 User=telegram
 Group=telegram
+MemoryHigh=320M
+MemoryMax=384M
 
 [Install]
 WantedBy=multi-user.target
