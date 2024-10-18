@@ -20,6 +20,8 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
     environment: springbox
+    needs:
+      - Build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
