@@ -6,7 +6,10 @@ public enum StateMachineEvents {
     COMMAND_ANNOUNCE,
     COMMAND_ECHO,
 
+    CALLBACK_ANNOUNCE,
+
     UNKNOWN;
 
     public final static String COMMAND_PREFIX = "COMMAND_";
+    public final static String CALLBACK_PREFIX = "CALLBACK_";
 }
