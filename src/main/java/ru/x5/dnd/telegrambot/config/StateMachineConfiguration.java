@@ -21,17 +21,21 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     private final Action<StateMachineStates, StateMachineEvents> echoAction;
     private final Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction;
     private final Action<StateMachineStates, StateMachineEvents> greetMembersAction;
+    private final Action<StateMachineStates, StateMachineEvents> searchInfoAction;
     private final Action<StateMachineStates, StateMachineEvents> announceAction;
     private final Action<StateMachineStates, StateMachineEvents> announceCallbackAction;
 
     public StateMachineConfiguration(Action<StateMachineStates, StateMachineEvents> echoAction,
                                      Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction,
                                      Action<StateMachineStates, StateMachineEvents> greetMembersAction,
+                                     Action<StateMachineStates, StateMachineEvents> searchInfoAction,
                                      Action<StateMachineStates, StateMachineEvents> announceAction,
                                      Action<StateMachineStates, StateMachineEvents> announceCallbackAction) {
         this.echoAction = echoAction;
         this.exceptionHandlerAction = exceptionHandlerAction;
         this.greetMembersAction = greetMembersAction;
+        this.searchInfoAction = searchInfoAction;
+
         this.announceAction = announceAction;
         this.announceCallbackAction = announceCallbackAction;
     }
@@ -52,30 +56,21 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
                 .and()
                 .withExternal()
                 .source(StateMachineStates.ECHO).target(StateMachineStates.READY)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.READY).target(StateMachineStates.GREET_NEW_MEMBERS)
-                .event(StateMachineEvents.NEW_MEMBERS)
-                .action(greetMembersAction, exceptionHandlerAction)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.GREET_NEW_MEMBERS).target(StateMachineStates.READY)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_GAME)
-                .event(StateMachineEvents.COMMAND_ANNOUNCE)
-                .action(announceAction, exceptionHandlerAction)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.ANNOUNCE_GAME).target(StateMachineStates.READY)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_CALLBACK)
-                .event(StateMachineEvents.CALLBACK_ANNOUNCE)
-                .action(announceCallbackAction, exceptionHandlerAction)
-                .and()
-                .withExternal()
-                .source(StateMachineStates.ANNOUNCE_CALLBACK).target(StateMachineStates.READY);
+                .and();
+
+        // GREET_NEW_MEMBERS
+        addStateFlow(transitions, StateMachineStates.GREET_NEW_MEMBERS, StateMachineEvents.NEW_MEMBERS, greetMembersAction);
+
+        // ANNOUNCE_GAME
+        addStateFlow(transitions, StateMachineStates.ANNOUNCE_GAME, StateMachineEvents.COMMAND_ANNOUNCE, announceAction);
+        // ANNOUNCE_CALLBACK
+        addStateFlow(transitions, StateMachineStates.ANNOUNCE_CALLBACK, StateMachineEvents.CALLBACK_ANNOUNCE, announceCallbackAction);
+
+        // COMMAND_SEARCH_INFO
+        addStateFlow(transitions, StateMachineStates.SEARCH_INFO, StateMachineEvents.COMMAND_SEARCH_INFO, searchInfoAction);
+        addStateFlow(transitions, StateMachineStates.SEARCH_DND_5E_RULE, StateMachineEvents.COMMAND_SEARCH_DND_5E_RULE, searchInfoAction);
+        addStateFlow(transitions, StateMachineStates.SEARCH_GAME_RULE, StateMachineEvents.COMMAND_SEARCH_GAME_RULE, searchInfoAction);
+        addStateFlow(transitions, StateMachineStates.HELP, StateMachineEvents.COMMAND_HELP, searchInfoAction);
     }
 
     @Bean
@@ -87,5 +82,28 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     public StateMachinePersister<StateMachineStates, StateMachineEvents, Object> redisStateMachinePersister(
             StateMachinePersist<StateMachineStates, StateMachineEvents, Object> stateMachinePersist) {
         return new DefaultStateMachinePersister<>(stateMachinePersist);
+    }
+
+    /**
+     * Добавление нового состояния в поток обработки машины состояний
+     *
+     * @param transitions транзит состояний
+     * @param state статус состояние
+     * @param stateEvent статус события состояния
+     * @param action действие на событие
+     * @throws Exception ошибка конфигурации
+     */
+    private void addStateFlow(final StateMachineTransitionConfigurer<StateMachineStates, StateMachineEvents> transitions,
+                              final StateMachineStates state,
+                              final StateMachineEvents stateEvent,
+                              final Action<StateMachineStates, StateMachineEvents> action) throws Exception {
+        transitions.withExternal()
+                .source(StateMachineStates.READY).target(state)
+                .event(stateEvent)
+                .action(action, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(state).target(StateMachineStates.READY)
+                .and();
     }
 }
