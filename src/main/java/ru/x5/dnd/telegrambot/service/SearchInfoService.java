@@ -2,6 +2,7 @@ package ru.x5.dnd.telegrambot.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,7 +23,7 @@ import static ru.x5.dnd.telegrambot.utils.ButtonUtils.createTextButton;
 import static ru.x5.dnd.telegrambot.utils.ButtonUtils.createUrlButton;
 
 @Service
-public class SearchInfoService {
+public class SearchInfoService implements InitializingBean {
     private final static Logger LOG = LoggerFactory.getLogger(SearchInfoService.class);
 
     private final TelegramService telegramService;
@@ -34,18 +35,6 @@ public class SearchInfoService {
                              PropertyMessageService propertyMessageService) {
         this.telegramService = telegramService;
         this.propertyMessageService = propertyMessageService;
-
-        fillMessageMap();
-    }
-
-    private void fillMessageMap() {
-        LOG.info("\nPrepare message map by commands for 'SearchInfoService'");
-
-        MESSAGE_MAP.put(COMMAND_SEARCH_INFO, propertyMessageService.getMessageByName("search.info.help"));
-        MESSAGE_MAP.put(COMMAND_SEARCH_DND_5E_RULE, propertyMessageService.getMessageByName("search.dnd.5e.rule"));
-        MESSAGE_MAP.put(COMMAND_SEARCH_GAME_RULE, propertyMessageService.getMessageByName("search.game.info"));
-
-        LOG.info("Prepare message map by commands - done\n");
     }
 
     /**
@@ -79,6 +68,11 @@ public class SearchInfoService {
         } catch (TelegramApiException e) {
             LOG.error("Cannot send message for chat id: {}", chatId, e);
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        fillMessageMap();
     }
 
     private SendMessage prepareSendMessage(final Long chatId, final StateMachineEvents command) {
@@ -156,5 +150,13 @@ public class SearchInfoService {
         rowList.add(List.of(createTextButton("Назад", "sinfo")));
     }
 
+    private void fillMessageMap() {
+        LOG.info("Prepare message map by commands for 'SearchInfoService'");
 
+        MESSAGE_MAP.put(COMMAND_SEARCH_INFO, propertyMessageService.getMessageByName("search.info.help"));
+        MESSAGE_MAP.put(COMMAND_SEARCH_DND_5E_RULE, propertyMessageService.getMessageByName("search.dnd.5e.rule"));
+        MESSAGE_MAP.put(COMMAND_SEARCH_GAME_RULE, propertyMessageService.getMessageByName("search.game.info"));
+
+        LOG.info("Prepare message map by commands - done\n");
+    }
 }

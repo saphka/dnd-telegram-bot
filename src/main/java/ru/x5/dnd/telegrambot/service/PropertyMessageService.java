@@ -30,7 +30,7 @@ public class PropertyMessageService {
      * @return сообщение
      */
     public String getMessageByName(final String propertyName) {
-        LOG.info(GET_PROP_BY_NAME, propertyName);
+        LOG.debug(GET_PROP_BY_NAME, propertyName);
         return getPropertyByName(propertyName, null);
     }
 
@@ -43,7 +43,7 @@ public class PropertyMessageService {
      * @return сообщение
      */
     public String getMessageByNameWithParams(final String propertyName, final Object[] args) {
-        LOG.info(GET_PROP_BY_NAME_WITH_ARGS, propertyName, args);
+        LOG.debug(GET_PROP_BY_NAME_WITH_ARGS, propertyName, args);
         return getPropertyByName(propertyName, args);
     }
 
@@ -51,7 +51,7 @@ public class PropertyMessageService {
         try {
             return messageSource.getMessage(propertyName, args, Locale.getDefault());
         } catch (NoSuchMessageException ex) {
-            throw new MessagePropertiesException(ex.getMessage());
+            throw new MessagePropertiesException(ex.getMessage(), ex.getCause());
         }
     }
 }
