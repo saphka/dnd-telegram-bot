@@ -25,7 +25,7 @@ public class GameService {
     }
 
     @Transactional
-    public void createGame(String chatId, String messageId, String messageThreadId, String author, LocalDate gameDate) {
+    public void createGame(String chatId, String messageId, String messageThreadId, String author, LocalDate gameDate, Integer maxPlayers) {
         Optional<Game> gameOptional = gameRepository.findFirstByChatIdAndMessageIdAndMessageThreadId(chatId, messageId, messageThreadId);
         if (gameOptional.isPresent()) {
             throw new BotLogicException(messageSource.getMessage("error.game-exists", null, Locale.getDefault()));
@@ -37,6 +37,7 @@ public class GameService {
         game.setMessageThreadId(messageThreadId);
         game.setAuthor(author);
         game.setGameDate(gameDate);
+        game.setMaxPlayers(maxPlayers);
         gameRepository.save(game);
     }
 
@@ -50,6 +51,10 @@ public class GameService {
 
         if (game.getGameRegistrations().stream().anyMatch(r -> userName.equals(r.getGamerName()))) {
             throw new BotLogicException(messageSource.getMessage("error.game-registration-exists", new Object[]{userName}, Locale.getDefault()));
+        }
+
+        if (game.getGameRegistrations().size() >= game.getMaxPlayers()) {
+            throw new BotLogicException(messageSource.getMessage("error.game-registration-maxed", null, Locale.getDefault()));
         }
 
         GameRegistration registration = new GameRegistration();

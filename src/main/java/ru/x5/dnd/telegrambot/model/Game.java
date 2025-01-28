@@ -29,6 +29,9 @@ public class Game {
     @NotNull
     private LocalDate gameDate;
 
+    @NotNull
+    private Integer maxPlayers;
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameRegistration> gameRegistrations = new ArrayList<>();
 
@@ -111,7 +114,15 @@ public class Game {
                 ", messageThreadId='" + messageThreadId + '\'' +
                 ", author='" + author + '\'' +
                 ", gameDate=" + gameDate +
+                ", maxPlayers=" + maxPlayers +
                 '}';
     }
 
+    public Integer getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(Integer maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
 }

@@ -25,11 +25,13 @@ public class AnnounceCallbackAction implements Action<StateMachineStates, StateM
     private final TelegramService telegramService;
     private final GameService gameService;
     private final MessageSource messageSource;
+    private final AnnounceKeyboardUpdater keyboardUpdater;
 
-    public AnnounceCallbackAction(TelegramService telegramService, GameService gameService, MessageSource messageSource) {
+    public AnnounceCallbackAction(TelegramService telegramService, GameService gameService, MessageSource messageSource, AnnounceKeyboardUpdater keyboardUpdater) {
         this.telegramService = telegramService;
         this.gameService = gameService;
         this.messageSource = messageSource;
+        this.keyboardUpdater = keyboardUpdater;
     }
 
     @Override
@@ -41,6 +43,7 @@ public class AnnounceCallbackAction implements Action<StateMachineStates, StateM
         var msg = constructMessage(update, message, game);
 
         try {
+            keyboardUpdater.updateGameMessageKeyboard(Long.parseLong(game.getChatId()), Integer.parseInt(game.getMessageId()), game.getGameRegistrations().size(), game.getMaxPlayers());
             telegramService.execute(msg);
         } catch (TelegramApiException e) {
             throw new IllegalStateException(e);

@@ -5,3 +5,6 @@ databaseChangeLog:
   - include:
       relativeToChangelogFile: true
       file: 20240817_game.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: 20250129_game_max_players.yaml
