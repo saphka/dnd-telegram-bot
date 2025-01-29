@@ -33,6 +33,7 @@ public class StatsAction implements Action<StateMachineStates, StateMachineEvent
             "stats.header.msg",
             "stats.header.author",
             "stats.header.date",
+            "stats.header.status",
             "stats.header.players"
     };
     private static final String SEPARATOR = ";";
@@ -103,6 +104,8 @@ public class StatsAction implements Action<StateMachineStates, StateMachineEvent
         sb.append(game.getAuthor())
                 .append(SEPARATOR);
         sb.append(formatter.format(game.getGameDate()))
+                .append(SEPARATOR);
+        sb.append(game.getStatus())
                 .append(SEPARATOR);
         sb.append(game.getGameRegistrations().stream().map(GameRegistration::getGamerName).collect(Collectors.joining(" ")))
                 .append(SEPARATOR);
