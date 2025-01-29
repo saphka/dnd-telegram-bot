@@ -11,3 +11,6 @@ databaseChangeLog:
   - include:
       relativeToChangelogFile: true
       file: 20250129_game_status.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: 20250129_game_version.yaml

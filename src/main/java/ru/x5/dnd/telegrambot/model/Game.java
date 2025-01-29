@@ -36,6 +36,9 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private GameStatus status;
 
+    @Version
+    private Integer version;
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GameRegistration> gameRegistrations = new ArrayList<>();
 
@@ -120,6 +123,7 @@ public class Game {
                 ", gameDate=" + gameDate +
                 ", maxPlayers=" + maxPlayers +
                 ", status=" + status +
+                ", version=" + version +
                 '}';
     }
 
@@ -137,5 +141,13 @@ public class Game {
 
     public void setStatus(GameStatus status) {
         this.status = status;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }
