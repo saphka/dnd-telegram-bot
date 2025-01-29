@@ -5,5 +5,6 @@ public enum StateMachineStates {
     ECHO,
     GREET_NEW_MEMBERS,
     ANNOUNCE_GAME,
-    ANNOUNCE_CALLBACK
+    ANNOUNCE_CALLBACK,
+    GET_GAME_STATS
 }

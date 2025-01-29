@@ -13,6 +13,7 @@ import ru.x5.dnd.telegrambot.repository.GameRepository;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class GameService {
@@ -96,5 +97,10 @@ public class GameService {
         game.setStatus(GameStatus.CANCELLED);
 
         return gameRepository.save(game);
+    }
+
+    @Transactional
+    public Stream<Game> findGamesAfter(String chatId, LocalDate dateAfter) {
+        return gameRepository.findByChatIdAndGameDateAfter(chatId, dateAfter);
     }
 }

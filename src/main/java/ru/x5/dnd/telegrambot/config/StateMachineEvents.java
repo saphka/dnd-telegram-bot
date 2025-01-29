@@ -5,6 +5,7 @@ public enum StateMachineEvents {
     NEW_MEMBERS,
     COMMAND_ANNOUNCE,
     COMMAND_ECHO,
+    COMMAND_STATS,
 
     CALLBACK_ANNOUNCE,
 
