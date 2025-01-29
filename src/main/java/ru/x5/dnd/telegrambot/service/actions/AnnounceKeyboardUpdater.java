@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.x5.dnd.telegrambot.config.CallbackConstants;
+import ru.x5.dnd.telegrambot.model.GameStatus;
 import ru.x5.dnd.telegrambot.service.TelegramService;
 
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ public class AnnounceKeyboardUpdater {
         this.telegramService = telegramService;
     }
 
-    public void updateGameMessageKeyboard(Long chatId, Integer messageId, Integer currentPlayers, Integer maxPlayers) throws TelegramApiException {
-        var keyboard = constructInlineKeyboardMarkup(currentPlayers, maxPlayers);
+    public void updateGameMessageKeyboard(Long chatId, Integer messageId, GameStatus gameStatus, Integer currentPlayers, Integer maxPlayers) throws TelegramApiException {
+        var keyboard = constructInlineKeyboardMarkup(gameStatus, currentPlayers, maxPlayers);
 
         var editKeyboard = new EditMessageReplyMarkup();
         editKeyboard.setChatId(chatId);
@@ -35,7 +36,10 @@ public class AnnounceKeyboardUpdater {
     }
 
 
-    private InlineKeyboardMarkup constructInlineKeyboardMarkup(Integer currentPlayers, Integer maxPlayers) {
+    private InlineKeyboardMarkup constructInlineKeyboardMarkup(GameStatus gameStatus, Integer currentPlayers, Integer maxPlayers) {
+        if (GameStatus.CANCELLED.equals(gameStatus)) {
+            return null;
+        }
         var registerWithCharButton = new InlineKeyboardButton();
         registerWithCharButton.setCallbackData(CallbackConstants.CALLBACK_ANNOUNCE_REG_WITH_CHARACTER);
         registerWithCharButton.setText(messageSource.getMessage("announce.reg-char", new Object[]{currentPlayers, maxPlayers}, Locale.getDefault()));
@@ -48,6 +52,10 @@ public class AnnounceKeyboardUpdater {
         unRegisterButton.setCallbackData(CallbackConstants.CALLBACK_ANNOUNCE_REG_CANCEL);
         unRegisterButton.setText(messageSource.getMessage("announce.unreg", null, Locale.getDefault()));
 
+        var gameCancelButton = new InlineKeyboardButton();
+        gameCancelButton.setCallbackData(CallbackConstants.CALLBACK_ANNOUNCE_CANCEL);
+        gameCancelButton.setText(messageSource.getMessage("announce.cancel", null, Locale.getDefault()));
+
         var keyboard = new InlineKeyboardMarkup();
         var lines = new ArrayList<List<InlineKeyboardButton>>();
         if (currentPlayers < maxPlayers) {
@@ -56,6 +64,7 @@ public class AnnounceKeyboardUpdater {
         if (currentPlayers > 0) {
             lines.add(List.of(unRegisterButton));
         }
+        lines.add(List.of(gameCancelButton));
         keyboard.setKeyboard(lines);
         return keyboard;
     }

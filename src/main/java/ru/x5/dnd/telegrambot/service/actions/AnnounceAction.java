@@ -16,6 +16,7 @@ import ru.x5.dnd.telegrambot.config.StateMachineEvents;
 import ru.x5.dnd.telegrambot.config.StateMachineStates;
 import ru.x5.dnd.telegrambot.config.TelegramMessageHeaders;
 import ru.x5.dnd.telegrambot.exception.BotLogicException;
+import ru.x5.dnd.telegrambot.model.Game;
 import ru.x5.dnd.telegrambot.service.GameService;
 import ru.x5.dnd.telegrambot.service.TelegramService;
 
@@ -56,8 +57,8 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
 
         try {
             var announcement = telegramService.execute(msg);
-            createGame(announcement, gameInfo.gameDate(), author, gameInfo.maxPlayers());
-            keyboardUpdater.updateGameMessageKeyboard(announcement.getChatId(), announcement.getMessageId(), 0, gameInfo.maxPlayers);
+            var game = createGame(announcement, gameInfo.gameDate(), author, gameInfo.maxPlayers());
+            keyboardUpdater.updateGameMessageKeyboard(announcement.getChatId(), announcement.getMessageId(), game.getStatus(), 0, gameInfo.maxPlayers);
             telegramService.execute(new PinChatMessage(announcement.getChatId().toString(), announcement.getMessageId()));
             telegramService.execute(new DeleteMessage(message.getChatId().toString(), message.getMessageId()));
             telegramService.execute(new DeleteMessage(message.getChatId().toString(), message.getReplyToMessage().getMessageId()));
@@ -66,8 +67,8 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
         }
     }
 
-    private void createGame(Message announcement, LocalDate gameDate, String author, Integer maxPlayers) {
-        gameService.createGame(announcement.getChatId().toString(),
+    private Game createGame(Message announcement, LocalDate gameDate, String author, Integer maxPlayers) {
+        return gameService.createGame(announcement.getChatId().toString(),
                 announcement.getMessageId().toString(),
                 announcement.getMessageThreadId().toString(),
                 author,

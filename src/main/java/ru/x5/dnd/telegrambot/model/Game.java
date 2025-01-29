@@ -32,7 +32,11 @@ public class Game {
     @NotNull
     private Integer maxPlayers;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private GameStatus status;
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GameRegistration> gameRegistrations = new ArrayList<>();
 
     public Long getId() {
@@ -115,6 +119,7 @@ public class Game {
                 ", author='" + author + '\'' +
                 ", gameDate=" + gameDate +
                 ", maxPlayers=" + maxPlayers +
+                ", status=" + status +
                 '}';
     }
 
@@ -124,5 +129,13 @@ public class Game {
 
     public void setMaxPlayers(Integer maxPlayers) {
         this.maxPlayers = maxPlayers;
+    }
+
+    public GameStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(GameStatus status) {
+        this.status = status;
     }
 }

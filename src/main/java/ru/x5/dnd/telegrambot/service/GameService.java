@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.x5.dnd.telegrambot.exception.BotLogicException;
 import ru.x5.dnd.telegrambot.model.Game;
 import ru.x5.dnd.telegrambot.model.GameRegistration;
+import ru.x5.dnd.telegrambot.model.GameStatus;
 import ru.x5.dnd.telegrambot.model.RegistrationType;
 import ru.x5.dnd.telegrambot.repository.GameRepository;
 
@@ -25,7 +26,7 @@ public class GameService {
     }
 
     @Transactional
-    public void createGame(String chatId, String messageId, String messageThreadId, String author, LocalDate gameDate, Integer maxPlayers) {
+    public Game createGame(String chatId, String messageId, String messageThreadId, String author, LocalDate gameDate, Integer maxPlayers) {
         Optional<Game> gameOptional = gameRepository.findFirstByChatIdAndMessageIdAndMessageThreadId(chatId, messageId, messageThreadId);
         if (gameOptional.isPresent()) {
             throw new BotLogicException(messageSource.getMessage("error.game-exists", null, Locale.getDefault()));
@@ -38,7 +39,8 @@ public class GameService {
         game.setAuthor(author);
         game.setGameDate(gameDate);
         game.setMaxPlayers(maxPlayers);
-        gameRepository.save(game);
+        game.setStatus(GameStatus.ACTIVE);
+        return gameRepository.save(game);
     }
 
     @Transactional
@@ -77,6 +79,21 @@ public class GameService {
         if (!game.getGameRegistrations().removeIf(registration -> registration.getGamerName().equals(userName))) {
             throw new BotLogicException(messageSource.getMessage("error.game-registration-not-exists", new Object[]{userName}, Locale.getDefault()));
         }
+
+        return gameRepository.save(game);
+    }
+
+    @Transactional
+    public Game cancelGame(String chatId, String messageId, String messageThreadId, String userName) {
+        Optional<Game> gameOptional = gameRepository.findFirstByChatIdAndMessageIdAndMessageThreadId(chatId, messageId, messageThreadId);
+        if (gameOptional.isEmpty()) {
+            throw new BotLogicException(messageSource.getMessage("error.game-not-exists", null, Locale.getDefault()));
+        }
+        Game game = gameOptional.get();
+        if (!game.getAuthor().equals(userName)) {
+            throw new BotLogicException(messageSource.getMessage("error.game-cancel-not-author", null, Locale.getDefault()));
+        }
+        game.setStatus(GameStatus.CANCELLED);
 
         return gameRepository.save(game);
     }
