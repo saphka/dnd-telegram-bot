@@ -7,6 +7,7 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -32,6 +33,7 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
 
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.getDefault());
     private static final int ANNOUNCE_COMMAND_ARGS_COUNT = 2;
+    public static final int MAX_PHOTO_CAPTION_LENGTH = 300;
 
     private final MessageSource messageSource;
     private final TelegramService telegramService;
@@ -52,11 +54,24 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
         var update = (Update) context.getMessageHeader(TelegramMessageHeaders.UPDATE);
         var message = update.getMessage();
         var author = extractAuthor(message);
-        var msg = constructMessage(message, author);
+        var photo = constructMessage(message, author);
         var gameInfo = extractGameInfo(message);
 
+        SendMessage msg = null;
+        if (photo.getCaption().length() > MAX_PHOTO_CAPTION_LENGTH) {
+            msg = new SendMessage();
+            msg.setChatId(photo.getChatId());
+            msg.setMessageThreadId(photo.getMessageThreadId());
+            msg.setText(photo.getCaption());
+            photo.setCaption("");
+        }
+
         try {
-            var announcement = telegramService.execute(msg);
+            var announcement = telegramService.execute(photo);
+            if (msg != null) {
+                msg.setReplyToMessageId(announcement.getMessageId());
+                announcement = telegramService.execute(msg);
+            }
             var game = createGame(announcement, gameInfo.gameDate(), author, gameInfo.maxPlayers());
             keyboardUpdater.updateGameMessageKeyboard(announcement.getChatId(), announcement.getMessageId(), game.getStatus(), 0, gameInfo.maxPlayers);
             telegramService.execute(new PinChatMessage(announcement.getChatId().toString(), announcement.getMessageId()));
