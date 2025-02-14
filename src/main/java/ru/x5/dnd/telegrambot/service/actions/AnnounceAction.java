@@ -6,6 +6,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -59,11 +60,7 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
 
         SendMessage msg = null;
         if (photo.getCaption().length() > MAX_PHOTO_CAPTION_LENGTH) {
-            msg = new SendMessage();
-            msg.setChatId(photo.getChatId());
-            msg.setMessageThreadId(photo.getMessageThreadId());
-            msg.setText(photo.getCaption());
-            photo.setCaption("");
+            msg = copyCaptionToSeparateMessage(photo);
         }
 
         try {
@@ -80,6 +77,17 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
         } catch (TelegramApiException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static SendMessage copyCaptionToSeparateMessage(SendPhoto photo) {
+        SendMessage msg;
+        msg = new SendMessage();
+        msg.setChatId(photo.getChatId());
+        msg.setMessageThreadId(photo.getMessageThreadId());
+        msg.setText(photo.getCaption());
+        msg.setParseMode(photo.getParseMode());
+        photo.setCaption("");
+        return msg;
     }
 
     private Game createGame(Message announcement, LocalDate gameDate, String author, Integer maxPlayers) {
@@ -100,7 +108,7 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
                 .findFirst()
                 .map(com -> com.getOffset() + com.getLength())
                 .orElse(0);
-        String[] commandArgs = message.getText().substring(botCommandOffset + 1).split(" ");
+        String[] commandArgs = message.getText().substring(botCommandOffset).trim().split(" ");
         if (commandArgs.length < ANNOUNCE_COMMAND_ARGS_COUNT) {
             throw new BotLogicException(messageSource.getMessage("error.announce.args-count", null, Locale.getDefault()));
         }
@@ -137,7 +145,7 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
         if (CollectionUtils.isEmpty(replyToMessage.getPhoto())) {
             throw new BotLogicException(messageSource.getMessage("error.announce.no-photo", null, Locale.getDefault()));
         }
-        msg.setCaption(replyToMessage.getCaption());
+        copyCaption(msg, replyToMessage);
         var photoMaxRes = replyToMessage.getPhoto().stream()
                 .max(Comparator.comparing(PhotoSize::getFileSize))
                 .orElseThrow();
@@ -150,6 +158,33 @@ public class AnnounceAction implements Action<StateMachineStates, StateMachineEv
         }
 
         return msg;
+    }
+
+    private static void copyCaption(SendPhoto msg, Message replyToMessage) {
+        if (CollectionUtils.isNotEmpty(replyToMessage.getCaptionEntities())) {
+            msg.setParseMode(ParseMode.HTML);
+            String text = replyToMessage.getCaption();
+            StringBuilder sb = new StringBuilder();
+            int offset = 0;
+            for (var entity : replyToMessage.getCaptionEntities()) {
+                sb.append(text, offset, entity.getOffset());
+                offset = entity.getOffset();
+                switch (entity.getType()) {
+                    case EntityType.BOLD:
+                        sb.append("<b>").append(entity.getText()).append("</b>");
+                        offset += entity.getLength();
+                        break;
+                    case EntityType.ITALIC:
+                        sb.append("<i>").append(entity.getText()).append("</i>");
+                        offset += entity.getLength();
+                        break;
+                }
+            }
+            sb.append(text, offset, text.length());
+            msg.setCaption(sb.toString());
+        } else {
+            msg.setCaption(replyToMessage.getCaption());
+        }
     }
 
     private record GameInfo(LocalDate gameDate, Integer maxPlayers) {
