@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.EntityType;
 import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.x5.dnd.telegrambot.config.CallbackConstants;
 import ru.x5.dnd.telegrambot.config.StateMachineEvents;
 import ru.x5.dnd.telegrambot.config.TelegramMessageHeaders;
 
@@ -35,6 +36,8 @@ public class TelegramUpdateProcessor {
     private String getMachineId(Update update) {
         if (update.hasMessage()) {
             return update.getMessage().getChatId().toString();
+        } else if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId().toString();
         }
         return null;
     }
@@ -63,6 +66,10 @@ public class TelegramUpdateProcessor {
             } else if (StringUtils.isNotEmpty(message.getText())) {
                 return StateMachineEvents.TEXT_INPUT;
             }
+        } else if (update.hasCallbackQuery()) {
+            var query = update.getCallbackQuery();
+            String[] split = query.getData().split("\\" + CallbackConstants.CALLBACK_SEPARATOR, 2);
+            return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.CALLBACK_PREFIX + split[0].toUpperCase(), StateMachineEvents.UNKNOWN);
         }
         return StateMachineEvents.UNKNOWN;
     }

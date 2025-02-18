@@ -21,13 +21,22 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     private final Action<StateMachineStates, StateMachineEvents> echoAction;
     private final Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction;
     private final Action<StateMachineStates, StateMachineEvents> greetMembersAction;
+    private final Action<StateMachineStates, StateMachineEvents> announceAction;
+    private final Action<StateMachineStates, StateMachineEvents> announceCallbackAction;
+    private final Action<StateMachineStates, StateMachineEvents> statsAction;
 
     public StateMachineConfiguration(Action<StateMachineStates, StateMachineEvents> echoAction,
                                      Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction,
-                                     Action<StateMachineStates, StateMachineEvents> greetMembersAction) {
+                                     Action<StateMachineStates, StateMachineEvents> greetMembersAction,
+                                     Action<StateMachineStates, StateMachineEvents> announceAction,
+                                     Action<StateMachineStates, StateMachineEvents> announceCallbackAction,
+                                     Action<StateMachineStates, StateMachineEvents> statsAction) {
         this.echoAction = echoAction;
         this.exceptionHandlerAction = exceptionHandlerAction;
         this.greetMembersAction = greetMembersAction;
+        this.announceAction = announceAction;
+        this.announceCallbackAction = announceCallbackAction;
+        this.statsAction = statsAction;
     }
 
     @Override
@@ -53,7 +62,31 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
                 .action(greetMembersAction, exceptionHandlerAction)
                 .and()
                 .withExternal()
-                .source(StateMachineStates.GREET_NEW_MEMBERS).target(StateMachineStates.READY);
+                .source(StateMachineStates.GREET_NEW_MEMBERS).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_GAME)
+                .event(StateMachineEvents.COMMAND_ANNOUNCE)
+                .action(announceAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.ANNOUNCE_GAME).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.GET_GAME_STATS)
+                .event(StateMachineEvents.COMMAND_STATS)
+                .action(statsAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.GET_GAME_STATS).target(StateMachineStates.READY)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.READY).target(StateMachineStates.ANNOUNCE_CALLBACK)
+                .event(StateMachineEvents.CALLBACK_ANNOUNCE)
+                .action(announceCallbackAction, exceptionHandlerAction)
+                .and()
+                .withExternal()
+                .source(StateMachineStates.ANNOUNCE_CALLBACK).target(StateMachineStates.READY);
     }
 
     @Bean

@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      author: saphka
+      id: 20240817_game
+      changes:
+        - createTable:
+            tableName: game
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: chat_id
+                  type: varchar(60)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message_id
+                  type: varchar(60)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message_thread_id
+                  type: varchar(60)
+              - column:
+                  name: author
+                  type: varchar(60)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: game_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: game_registration
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: game_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: game
+                    referencedColumnNames: id
+                    foreignKeyName: fk_game_id
+              - column:
+                  name: gamer_name
+                  type: varchar(60)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: registration_type
+                  type: varchar(60)
+                  constraints:
+                    nullable: false

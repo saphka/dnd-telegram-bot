@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      author: saphka
+      id: 20250129_game_max_players
+      changes:
+        - addColumn:
+            tableName: game
+            columns:
+              - column:
+                  name: status
+                  type: varchar(60)
+                  constraints:
+                    nullable: false
+                  value: ACTIVE
