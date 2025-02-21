@@ -24,13 +24,15 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
     private final Action<StateMachineStates, StateMachineEvents> searchInfoAction;
     private final Action<StateMachineStates, StateMachineEvents> announceAction;
     private final Action<StateMachineStates, StateMachineEvents> announceCallbackAction;
+    private final Action<StateMachineStates, StateMachineEvents> statsAction;
 
     public StateMachineConfiguration(Action<StateMachineStates, StateMachineEvents> echoAction,
                                      Action<StateMachineStates, StateMachineEvents> exceptionHandlerAction,
                                      Action<StateMachineStates, StateMachineEvents> greetMembersAction,
-                                     Action<StateMachineStates, StateMachineEvents> searchInfoAction,
                                      Action<StateMachineStates, StateMachineEvents> announceAction,
-                                     Action<StateMachineStates, StateMachineEvents> announceCallbackAction) {
+                                     Action<StateMachineStates, StateMachineEvents> announceCallbackAction,
+                                     Action<StateMachineStates, StateMachineEvents> statsAction,
+                                     Action<StateMachineStates, StateMachineEvents> searchInfoAction) {
         this.echoAction = echoAction;
         this.exceptionHandlerAction = exceptionHandlerAction;
         this.greetMembersAction = greetMembersAction;
@@ -38,6 +40,7 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
 
         this.announceAction = announceAction;
         this.announceCallbackAction = announceCallbackAction;
+        this.statsAction = statsAction;
     }
 
     @Override
@@ -56,10 +59,15 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
                 .and()
                 .withExternal()
                 .source(StateMachineStates.ECHO).target(StateMachineStates.READY)
-                .and();
+                .and()
+        ;
+
 
         // GREET_NEW_MEMBERS
         addStateFlow(transitions, StateMachineStates.GREET_NEW_MEMBERS, StateMachineEvents.NEW_MEMBERS, greetMembersAction);
+
+        // COMMAND_STATS
+        addStateFlow(transitions, StateMachineStates.GET_GAME_STATS, StateMachineEvents.COMMAND_STATS, statsAction);
 
         // ANNOUNCE_GAME
         addStateFlow(transitions, StateMachineStates.ANNOUNCE_GAME, StateMachineEvents.COMMAND_ANNOUNCE, announceAction);

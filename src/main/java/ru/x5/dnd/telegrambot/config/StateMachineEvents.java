@@ -9,7 +9,7 @@ public enum StateMachineEvents {
     NEW_MEMBERS(Set.of("")),
     COMMAND_ANNOUNCE(Set.of("")),
     COMMAND_ECHO(Set.of("")),
-
+    COMMAND_STATS(Set.of("")),
     COMMAND_SEARCH(Set.of("")),
 
     /** Команда, отображающая стартовую информацию перед поиском */
@@ -26,8 +26,10 @@ public enum StateMachineEvents {
 
     CALLBACK_ANNOUNCE(Set.of("/announce")),
 
-    UNKNOWN(Set.of(""));
+    UNKNOWN(Set.of(""))
+    ;
 
+    public final static String COMMAND_PREFIX = "COMMAND_";
     public final static String CALLBACK_PREFIX = "CALLBACK_";
 
     private final Set<String> commands;

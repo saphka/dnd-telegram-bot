@@ -4,6 +4,7 @@ public enum StateMachineStates {
     READY,
     ECHO,
     GREET_NEW_MEMBERS,
+    GET_GAME_STATS,
     SEARCH,
 
     /** Событие, отображающее стартовую информацию перед поиском */
