@@ -62,7 +62,6 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
                 .and()
         ;
 
-
         // GREET_NEW_MEMBERS
         addStateFlow(transitions, StateMachineStates.GREET_NEW_MEMBERS, StateMachineEvents.NEW_MEMBERS, greetMembersAction);
 
@@ -75,10 +74,10 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
         addStateFlow(transitions, StateMachineStates.ANNOUNCE_CALLBACK, StateMachineEvents.CALLBACK_ANNOUNCE, announceCallbackAction);
 
         // COMMAND_SEARCH_INFO
-        addStateFlow(transitions, StateMachineStates.SEARCH_INFO, StateMachineEvents.COMMAND_SEARCH_INFO, searchInfoAction);
-        addStateFlow(transitions, StateMachineStates.SEARCH_DND_5E_RULE, StateMachineEvents.COMMAND_SEARCH_DND_5E_RULE, searchInfoAction);
-        addStateFlow(transitions, StateMachineStates.SEARCH_GAME_RULE, StateMachineEvents.COMMAND_SEARCH_GAME_RULE, searchInfoAction);
         addStateFlow(transitions, StateMachineStates.HELP, StateMachineEvents.COMMAND_HELP, searchInfoAction);
+        // COMMAND_SEARCH_CALLBACK
+        addStateFlow(transitions, StateMachineStates.HELP_CALLBACK, StateMachineEvents.CALLBACK_HELP, searchInfoAction);
+
     }
 
     @Bean

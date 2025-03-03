@@ -1,4 +1,4 @@
-package ru.x5.dnd.telegrambot.service.actions;
+package ru.x5.dnd.telegrambot.service.actions.announce;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.MessageSource;

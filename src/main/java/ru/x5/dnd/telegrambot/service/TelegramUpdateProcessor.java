@@ -69,7 +69,7 @@ public class TelegramUpdateProcessor {
         } else if (update.hasCallbackQuery()) {
             var query = update.getCallbackQuery();
             String[] split = query.getData().split("\\" + CallbackConstants.CALLBACK_SEPARATOR, 2);
-            return getStateMachineEvent(split[0]);
+            return getStateMachineEvent(StateMachineEvents.CALLBACK_PREFIX + split[0]);
         }
         return StateMachineEvents.UNKNOWN;
     }

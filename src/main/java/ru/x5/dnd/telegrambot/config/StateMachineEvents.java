@@ -2,48 +2,39 @@ package ru.x5.dnd.telegrambot.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public enum StateMachineEvents {
-    TEXT_INPUT(Set.of("")),
-    NEW_MEMBERS(Set.of("")),
-    COMMAND_ANNOUNCE(Set.of("")),
-    COMMAND_ECHO(Set.of("")),
-    COMMAND_STATS(Set.of("")),
-    COMMAND_SEARCH(Set.of("")),
-
-    /** Команда, отображающая стартовую информацию перед поиском */
-    COMMAND_SEARCH_INFO(Set.of("sinfo", "searchinfo")),
-
-    /** Команда, отображающая информацию по D&D */
-    COMMAND_SEARCH_DND_5E_RULE(Set.of("sdnd5erule", "searchdnd5erule")),
-
-    /** Команда, отображающая информацию по правилам проведения игр */
-    COMMAND_SEARCH_GAME_RULE(Set.of("searchgamerule", "sgamerule", "sgrule")),
-
+    TEXT_INPUT(""),
+    NEW_MEMBERS(""),
+    COMMAND_ANNOUNCE("announce"),
+    COMMAND_ECHO(""),
+    COMMAND_STATS(""),
+    COMMAND_SEARCH(""),
+    
     /** Команда, отображающая информацию по всем доступным коммандам */
-    COMMAND_HELP(Set.of("help")),
+    COMMAND_HELP("help"),
+    CALLBACK_HELP("callback_help"),
 
-    CALLBACK_ANNOUNCE(Set.of("/announce")),
+    CALLBACK_ANNOUNCE("callback_announce"),
 
-    UNKNOWN(Set.of(""))
+    UNKNOWN("")
     ;
 
     public final static String COMMAND_PREFIX = "COMMAND_";
     public final static String CALLBACK_PREFIX = "CALLBACK_";
 
-    private final Set<String> commands;
+    private final String command;
 
     private static final Map<String, StateMachineEvents> CACHED_VALUES = new HashMap<>();
 
     static {
         for (StateMachineEvents items : values()) {
-            items.commands.forEach(command -> CACHED_VALUES.put(command, items));
+            CACHED_VALUES.put(items.command, items);
         }
     }
 
-    StateMachineEvents(Set<String> commands) {
-        this.commands = commands;
+    StateMachineEvents(String command) {
+        this.command = command;
     }
 
     /**
@@ -53,6 +44,12 @@ public enum StateMachineEvents {
      * @return событие, если команда был найдена, иначе UNKNOWN
      */
     public static StateMachineEvents getStateEventByCommand(final String stringCommand) {
-        return CACHED_VALUES.getOrDefault(stringCommand, StateMachineEvents.UNKNOWN);
+        for (String key : CACHED_VALUES.keySet()) {
+            if (key.equalsIgnoreCase(stringCommand)) {
+                return CACHED_VALUES.get(key);
+            }
+        }
+        return UNKNOWN;
+        //return CACHED_VALUES.getOrDefault(stringCommand, StateMachineEvents.UNKNOWN);
     }
 }

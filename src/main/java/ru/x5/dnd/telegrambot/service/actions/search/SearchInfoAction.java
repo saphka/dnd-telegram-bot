@@ -1,8 +1,9 @@
-package ru.x5.dnd.telegrambot.service.actions;
+package ru.x5.dnd.telegrambot.service.actions.search;
 
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.x5.dnd.telegrambot.config.StateMachineEvents;
 import ru.x5.dnd.telegrambot.config.StateMachineStates;
@@ -24,8 +25,9 @@ public class SearchInfoAction implements Action<StateMachineStates, StateMachine
         var message = update.getMessage();
 
         if (message == null) {
-            var callBackMessage = update.getCallbackQuery().getMessage();
-            searchInfoService.callBackAnswer(callBackMessage.getChatId(), command);
+            var callBackMessage = (Message) update.getCallbackQuery().getMessage();
+            var callBackCommand = update.getCallbackQuery().getData();
+            searchInfoService.callBackAnswer(callBackMessage.getChatId(), callBackCommand);
         } else {
             searchInfoService.answer(message.getChatId(), command);
         }
