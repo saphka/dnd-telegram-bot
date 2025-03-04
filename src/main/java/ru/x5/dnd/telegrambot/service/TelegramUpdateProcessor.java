@@ -61,7 +61,7 @@ public class TelegramUpdateProcessor {
                         .stream()
                         .filter(e -> EntityType.BOTCOMMAND.equals(e.getType())).findFirst();
                 if (command.isPresent()) {
-                    return getStateMachineEvent(extractCommand(command.get()));
+                    return getStateMachineEvent(StateMachineEvents.COMMAND_PREFIX + extractCommand(command.get()));
                 }
             } else if (StringUtils.isNotEmpty(message.getText())) {
                 return StateMachineEvents.TEXT_INPUT;

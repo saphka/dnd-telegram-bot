@@ -77,7 +77,6 @@ public class StateMachineConfiguration extends EnumStateMachineConfigurerAdapter
         addStateFlow(transitions, StateMachineStates.HELP, StateMachineEvents.COMMAND_HELP, searchInfoAction);
         // COMMAND_SEARCH_CALLBACK
         addStateFlow(transitions, StateMachineStates.HELP_CALLBACK, StateMachineEvents.CALLBACK_HELP, searchInfoAction);
-
     }
 
     @Bean

@@ -20,16 +20,15 @@ public class SearchInfoAction implements Action<StateMachineStates, StateMachine
 
     @Override
     public void execute(StateContext<StateMachineStates, StateMachineEvents> context) {
-        var command = context.getEvent();
         var update = (Update) context.getMessageHeader(TelegramMessageHeaders.UPDATE);
         var message = update.getMessage();
 
         if (message == null) {
             var callBackMessage = (Message) update.getCallbackQuery().getMessage();
             var callBackCommand = update.getCallbackQuery().getData();
-            searchInfoService.callBackAnswer(callBackMessage.getChatId(), callBackCommand);
+            searchInfoService.callBackAnswer(callBackMessage, callBackCommand);
         } else {
-            searchInfoService.answer(message.getChatId(), command);
+            searchInfoService.answer(message);
         }
     }
 }

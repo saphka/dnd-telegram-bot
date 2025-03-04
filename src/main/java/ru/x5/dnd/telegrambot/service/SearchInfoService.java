@@ -6,10 +6,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.x5.dnd.telegrambot.config.StateMachineEvents;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,34 +41,51 @@ public class SearchInfoService implements InitializingBean {
     /**
      * Отображение всех доступных команд поиска
      *
-     * @param chatId id чата
+     * @param message сообщение
      */
-    public void answer(final Long chatId, final StateMachineEvents command) {
+    public void answer(final Message message) {
+        var chatId = message.getChatId();
         var msg = prepareSendMessage(chatId);
-        msg.setText(MESSAGE_MAP.get(CALLBACK_COMMAND_SEARCH_INFO));
 
-        addButtons(command, msg);
-
-        try {
-            telegramService.execute(msg);
-        } catch (TelegramApiException e) {
-            LOG.error("Cannot send message for chat id: {}", chatId, e);
+        if (message.getChat().isUserChat()) {
+            msg.setText(MESSAGE_MAP.get(CALLBACK_COMMAND_SEARCH_INFO));
+            addButtons(msg);
+        } else {
+            msg.setText(propertyMessageService.getMessageByNameWithParams(
+                    "search.write.me.private",
+                    new Object[] { message.getFrom().getUserName() }
+            ));
         }
+
+        sendMessageToTelegram(msg, chatId);
     }
 
     /**
      * Отправка сообщения пользователю в чат при событии: "нажата кнопка"
      *
-     * @param chatId id чата, в который возвращается ответ
+     * @param message сообщение
      * @param command событие машины состояний
      */
-    public void callBackAnswer(final Long chatId, final String command) {
+    public void callBackAnswer(final Message message, final String command) {
+        var chatId = message.getChatId();
         var msg = prepareSendMessage(chatId);
-        msg.setText(MESSAGE_MAP.getOrDefault(command, CALLBACK_COMMAND_SEARCH_INFO));
-        addCallBackButtons(command, msg);
 
+        if (message.getChat().isUserChat()) {
+            msg.setText(MESSAGE_MAP.getOrDefault(command, CALLBACK_COMMAND_SEARCH_INFO));
+            addCallBackButtons(command, msg);
+        } else {
+            msg.setText(propertyMessageService.getMessageByNameWithParams(
+                    "search.write.me.private",
+                    new Object[] { message.getFrom().getUserName() }
+            ));
+        }
+
+        sendMessageToTelegram(msg, chatId);
+    }
+
+    private void sendMessageToTelegram(final SendMessage message, final Long chatId) {
         try {
-            telegramService.execute(msg);
+            telegramService.execute(message);
         } catch (TelegramApiException e) {
             LOG.error("Cannot send message for chat id: {}", chatId, e);
         }
@@ -89,26 +106,18 @@ public class SearchInfoService implements InitializingBean {
     /**
      * Создание кнопок
      *
-     * @param command событие машины состояний
      * @param msg отправлемое сообщение в чат
      */
-    private void addButtons(final StateMachineEvents command, final SendMessage msg) {
+    private void addButtons(final SendMessage msg) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
-        if (command.name().equals(CALLBACK_SEARCH_GAME_RULE)) {
-            createSearchGameRuleButtons(rowList);
-        } else if (command.name().equals(CALLBACK_SEARCH_DND_5E_RULE)) {
-            createSearchDNDRuleButtons(rowList);
-        } else {
-            rowList.add(
-                    List.of(
-                            createTextButton("Правила D&D 5E", CALLBACK_SEARCH_DND_5E_RULE),
-                            createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)
-                    )
-            );
-
-            rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
-        }
+        rowList.add(
+                List.of(
+                        createTextButton("Правила D&D 5E", CALLBACK_SEARCH_DND_5E_RULE),
+                        createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)
+                )
+        );
+        rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
 
         msg.setReplyMarkup(InlineKeyboardMarkup.builder()
                 .keyboard(rowList)

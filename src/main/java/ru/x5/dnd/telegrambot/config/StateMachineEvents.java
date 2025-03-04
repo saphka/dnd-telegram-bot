@@ -4,37 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum StateMachineEvents {
-    TEXT_INPUT(""),
-    NEW_MEMBERS(""),
-    COMMAND_ANNOUNCE("announce"),
-    COMMAND_ECHO(""),
-    COMMAND_STATS(""),
-    COMMAND_SEARCH(""),
+    TEXT_INPUT(),
+    NEW_MEMBERS(),
+    COMMAND_ANNOUNCE(),
+    COMMAND_ECHO(),
+    COMMAND_STATS(),
+    COMMAND_SEARCH(),
     
     /** Команда, отображающая информацию по всем доступным коммандам */
-    COMMAND_HELP("help"),
-    CALLBACK_HELP("callback_help"),
+    COMMAND_HELP(),
+    CALLBACK_HELP(),
 
-    CALLBACK_ANNOUNCE("callback_announce"),
+    CALLBACK_ANNOUNCE(),
 
-    UNKNOWN("")
+    UNKNOWN()
     ;
 
     public final static String COMMAND_PREFIX = "COMMAND_";
     public final static String CALLBACK_PREFIX = "CALLBACK_";
 
-    private final String command;
-
     private static final Map<String, StateMachineEvents> CACHED_VALUES = new HashMap<>();
 
     static {
-        for (StateMachineEvents items : values()) {
-            CACHED_VALUES.put(items.command, items);
+        for (StateMachineEvents item : values()) {
+            CACHED_VALUES.put(item.name(), item);
         }
-    }
-
-    StateMachineEvents(String command) {
-        this.command = command;
     }
 
     /**
@@ -50,6 +44,5 @@ public enum StateMachineEvents {
             }
         }
         return UNKNOWN;
-        //return CACHED_VALUES.getOrDefault(stringCommand, StateMachineEvents.UNKNOWN);
     }
 }
