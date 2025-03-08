@@ -12,6 +12,8 @@ public class CallbackConstants {
     public static final String CALLBACK_ANNOUNCE_CANCEL = ANNOUNCE_PREFIX + CALLBACK_SEPARATOR + "cancel";
 
     public static final String CALLBACK_COMMAND_SEARCH_INFO = HELP_PREFIX + CALLBACK_SEPARATOR + "search-info";
+
+    public static final String CALLBACK_SEARCH_MECHANIC_TYPES = HELP_PREFIX + CALLBACK_SEPARATOR + "search-mechanic-types";
     public static final String CALLBACK_SEARCH_DND_5E_RULE = HELP_PREFIX + CALLBACK_SEPARATOR + "search-dnd5e-rule";
     public static final String CALLBACK_SEARCH_GAME_RULE = HELP_PREFIX + CALLBACK_SEPARATOR + "search-game-rule";
 

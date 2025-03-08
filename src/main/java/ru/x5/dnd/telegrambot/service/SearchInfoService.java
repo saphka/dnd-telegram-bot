@@ -20,6 +20,7 @@ import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_COMMAND_SE
 import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_DND_5E_RULE;
 import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_GAME_RULE;
 
+import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_MECHANIC_TYPES;
 import static ru.x5.dnd.telegrambot.utils.ButtonUtils.createTextButton;
 import static ru.x5.dnd.telegrambot.utils.ButtonUtils.createUrlButton;
 
@@ -110,14 +111,7 @@ public class SearchInfoService implements InitializingBean {
      */
     private void addButtons(final SendMessage msg) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-
-        rowList.add(
-                List.of(
-                        createTextButton("Правила D&D 5E", CALLBACK_SEARCH_DND_5E_RULE),
-                        createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)
-                )
-        );
-        rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
+        createDefaultSearchButtons(rowList);
 
         msg.setReplyMarkup(InlineKeyboardMarkup.builder()
                 .keyboard(rowList)
@@ -131,6 +125,8 @@ public class SearchInfoService implements InitializingBean {
             createSearchGameRuleButtons(rowList);
         } else if (CALLBACK_SEARCH_DND_5E_RULE.equals(command)) {
             createSearchDNDRuleButtons(rowList);
+        } else if (CALLBACK_SEARCH_MECHANIC_TYPES.equals(command)) {
+            createMechanicTypesButtons(rowList);
         } else {
             createDefaultSearchButtons(rowList);
         }
@@ -141,17 +137,38 @@ public class SearchInfoService implements InitializingBean {
         );
     }
 
+    /**
+     * Отображение раздела поиска по-умолчанию
+     *
+     * @param rowList список кнопок
+     */
     private void createDefaultSearchButtons(final List<List<InlineKeyboardButton>> rowList) {
-        rowList.add(
-                List.of(
-                        createTextButton("Правила D&D 5E", CALLBACK_SEARCH_DND_5E_RULE),
-                        createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)
-                )
-        );
+        rowList.add(List.of(createTextButton("Правила механик", CALLBACK_SEARCH_MECHANIC_TYPES)));
+        rowList.add(List.of(createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)));
+        rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
+
+        // используется для тестирования приветсвенного сообщения
+        //rowList.add(List.of(createTextButton("greeting.new-member", "help.test")));
+    }
+
+    /**
+     * Отображение раздела с механиками игры: "Правила механик"
+     *
+     * @param rowList список кнопок
+     */
+    private void createMechanicTypesButtons(final List<List<InlineKeyboardButton>> rowList) {
+        rowList.add(List.of(createTextButton("D&D 5E", CALLBACK_SEARCH_DND_5E_RULE)));
+        rowList.add(List.of(createUrlButton("Dungeon World", "https://t.me/c/1856208477/11034")));
+        rowList.add(List.of(createUrlButton("Savage Worlds", "https://t.me/c/1856208477/14870")));
 
         rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
     }
 
+    /**
+     * Отображение раздела с механикой: "Правила механик" -> "Правила D&D 5E"
+     *
+     * @param rowList список кнопок
+     */
     private void createSearchDNDRuleButtons(final List<List<InlineKeyboardButton>> rowList) {
         rowList.add(List.of(createUrlButton("Как играть?", "https://t.me/c/1856208477/4859/6206")));
         rowList.add(List.of(
@@ -169,6 +186,11 @@ public class SearchInfoService implements InitializingBean {
         rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
     }
 
+    /**
+     * Отображение раздела: "Информация по играм"
+     *
+     * @param rowList список кнопок
+     */
     private void createSearchGameRuleButtons(final List<List<InlineKeyboardButton>> rowList) {
         rowList.add(List.of(
                 createUrlButton("Запись", "https://t.me/c/1856208477/4859/6209"),
@@ -189,6 +211,10 @@ public class SearchInfoService implements InitializingBean {
         MESSAGE_MAP.put(CALLBACK_COMMAND_SEARCH_INFO, propertyMessageService.getMessageByName("search.info.help"));
         MESSAGE_MAP.put(CALLBACK_SEARCH_DND_5E_RULE, propertyMessageService.getMessageByName("search.dnd.5e.rule"));
         MESSAGE_MAP.put(CALLBACK_SEARCH_GAME_RULE, propertyMessageService.getMessageByName("search.game.info"));
+        MESSAGE_MAP.put(CALLBACK_SEARCH_MECHANIC_TYPES, propertyMessageService.getMessageByName("search.mechanic.types"));
+
+        // используется для быстрйо отладки сообщений
+        //MESSAGE_MAP.put("help.test", propertyMessageService.getMessageByName("greeting.new-member"));
 
         LOG.info("Prepare message map by commands - done\n");
     }
