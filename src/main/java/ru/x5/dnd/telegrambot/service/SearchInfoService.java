@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.x5.dnd.telegrambot.config.BotProperties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_COMMAND_SEARCH_INFO;
+import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_ADMINISTRATOR;
 import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_DND_5E_RULE;
 import static ru.x5.dnd.telegrambot.config.CallbackConstants.CALLBACK_SEARCH_GAME_RULE;
 
@@ -31,12 +33,16 @@ public class SearchInfoService implements InitializingBean {
     private final TelegramService telegramService;
     private final PropertyMessageService propertyMessageService;
 
+    private final BotProperties botProperties;
+
     private static final Map<String, String> MESSAGE_MAP = new HashMap<>();
 
     public SearchInfoService(TelegramService telegramService,
-                             PropertyMessageService propertyMessageService) {
+                             PropertyMessageService propertyMessageService,
+                             BotProperties botProperties) {
         this.telegramService = telegramService;
         this.propertyMessageService = propertyMessageService;
+        this.botProperties = botProperties;
     }
 
     /**
@@ -47,10 +53,11 @@ public class SearchInfoService implements InitializingBean {
     public void answer(final Message message) {
         var chatId = message.getChatId();
         var msg = prepareSendMessage(chatId);
+        var isAdmin = botProperties.masters().contains(message.getFrom().getUserName());
 
         if (message.getChat().isUserChat()) {
             msg.setText(MESSAGE_MAP.get(CALLBACK_COMMAND_SEARCH_INFO));
-            addButtons(msg);
+            addButtons(msg, isAdmin);
         } else {
             msg.setText(propertyMessageService.getMessageByNameWithParams(
                     "search.write.me.private",
@@ -70,10 +77,11 @@ public class SearchInfoService implements InitializingBean {
     public void callBackAnswer(final Message message, final String command) {
         var chatId = message.getChatId();
         var msg = prepareSendMessage(chatId);
+        var isAdmin = botProperties.masters().contains(message.getChat().getUserName());
 
         if (message.getChat().isUserChat()) {
             msg.setText(MESSAGE_MAP.getOrDefault(command, CALLBACK_COMMAND_SEARCH_INFO));
-            addCallBackButtons(command, msg);
+            addCallBackButtons(command, msg, isAdmin);
         } else {
             msg.setText(propertyMessageService.getMessageByNameWithParams(
                     "search.write.me.private",
@@ -109,16 +117,16 @@ public class SearchInfoService implements InitializingBean {
      *
      * @param msg отправлемое сообщение в чат
      */
-    private void addButtons(final SendMessage msg) {
+    private void addButtons(final SendMessage msg, final boolean isAdmin) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        createDefaultSearchButtons(rowList);
+        createDefaultSearchButtons(rowList, isAdmin);
 
         msg.setReplyMarkup(InlineKeyboardMarkup.builder()
                 .keyboard(rowList)
                 .build()
         );
     }
-    private void addCallBackButtons(final String command, final SendMessage msg) {
+    private void addCallBackButtons(final String command, final SendMessage msg, final boolean isAdmin) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
         if (CALLBACK_SEARCH_GAME_RULE.equals(command)) {
@@ -127,8 +135,10 @@ public class SearchInfoService implements InitializingBean {
             createSearchDNDRuleButtons(rowList);
         } else if (CALLBACK_SEARCH_MECHANIC_TYPES.equals(command)) {
             createMechanicTypesButtons(rowList);
+        } else if (CALLBACK_SEARCH_ADMINISTRATOR.equals(command)) {
+            createSearchAdministratorButtons(rowList);
         } else {
-            createDefaultSearchButtons(rowList);
+            createDefaultSearchButtons(rowList, isAdmin);
         }
 
         msg.setReplyMarkup(InlineKeyboardMarkup.builder()
@@ -141,10 +151,17 @@ public class SearchInfoService implements InitializingBean {
      * Отображение раздела поиска по-умолчанию
      *
      * @param rowList список кнопок
+     * @param isAdmin признак того, что пользователь администратор
      */
-    private void createDefaultSearchButtons(final List<List<InlineKeyboardButton>> rowList) {
+    private void createDefaultSearchButtons(final List<List<InlineKeyboardButton>> rowList,
+                                            final boolean isAdmin) {
         rowList.add(List.of(createTextButton("Правила механик", CALLBACK_SEARCH_MECHANIC_TYPES)));
         rowList.add(List.of(createTextButton("Информация по играм", CALLBACK_SEARCH_GAME_RULE)));
+
+        if (isAdmin) {
+            rowList.add(List.of(createTextButton("Команды администратора", CALLBACK_SEARCH_ADMINISTRATOR)));
+        }
+
         rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
 
         // используется для тестирования приветсвенного сообщения
@@ -152,7 +169,7 @@ public class SearchInfoService implements InitializingBean {
     }
 
     /**
-     * Отображение раздела с механиками игры: "Правила механик"
+     * Отображение раздела с механиками игры: "Поиск -> Правила механик"
      *
      * @param rowList список кнопок
      */
@@ -165,7 +182,7 @@ public class SearchInfoService implements InitializingBean {
     }
 
     /**
-     * Отображение раздела с механикой: "Правила механик" -> "Правила D&D 5E"
+     * Отображение раздела с механикой: "Поиск -> Правила механик" -> "Правила D&D 5E"
      *
      * @param rowList список кнопок
      */
@@ -187,7 +204,7 @@ public class SearchInfoService implements InitializingBean {
     }
 
     /**
-     * Отображение раздела: "Информация по играм"
+     * Отображение раздела: "Поиск -> Информация по играм"
      *
      * @param rowList список кнопок
      */
@@ -205,6 +222,15 @@ public class SearchInfoService implements InitializingBean {
         rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
     }
 
+    /**
+     * Отображение раздела: "Поиск -> Команды администратора"
+     *
+     * @param rowList список кнопок
+     */
+    private void createSearchAdministratorButtons(final List<List<InlineKeyboardButton>> rowList) {
+        rowList.add(List.of(createTextButton("Все команды", CALLBACK_COMMAND_SEARCH_INFO)));
+    }
+
     private void fillMessageMap() {
         LOG.info("Prepare message map by commands for 'SearchInfoService'");
 
@@ -213,8 +239,10 @@ public class SearchInfoService implements InitializingBean {
         MESSAGE_MAP.put(CALLBACK_SEARCH_GAME_RULE, propertyMessageService.getMessageByName("search.game.info"));
         MESSAGE_MAP.put(CALLBACK_SEARCH_MECHANIC_TYPES, propertyMessageService.getMessageByName("search.mechanic.types"));
 
+        MESSAGE_MAP.put(CALLBACK_SEARCH_ADMINISTRATOR, propertyMessageService.getMessageByName("search.administrator"));
+
         // используется для быстрйо отладки сообщений
-        //MESSAGE_MAP.put("help.test", propertyMessageService.getMessageByName("greeting.new-member"));
+        //MESSAGE_MAP.put("help.test", propertyMessageService.getMessageByNameWithParams("greeting.new-member", new Object[] { "@alexwardrune", botProperties.username() }));
 
         LOG.info("Prepare message map by commands - done\n");
     }

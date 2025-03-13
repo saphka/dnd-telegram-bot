@@ -17,6 +17,8 @@ public class CallbackConstants {
     public static final String CALLBACK_SEARCH_DND_5E_RULE = HELP_PREFIX + CALLBACK_SEPARATOR + "search-dnd5e-rule";
     public static final String CALLBACK_SEARCH_GAME_RULE = HELP_PREFIX + CALLBACK_SEPARATOR + "search-game-rule";
 
+    public static final String CALLBACK_SEARCH_ADMINISTRATOR = HELP_PREFIX + CALLBACK_SEPARATOR + "search-administrator";
+
     private CallbackConstants() {
     }
 }
