@@ -4,7 +4,16 @@ public enum StateMachineStates {
     READY,
     ECHO,
     GREET_NEW_MEMBERS,
+    GET_GAME_STATS,
+    SEARCH,
+
+    /** Событие, отображающее информацию по всем доступным коммандам */
+    HELP,
+    /** Событие, реагирующее на действия пользователя и администратора при поиске */
+    HELP_CALLBACK,
+
+    /** Событие, создающее анонс игры */
     ANNOUNCE_GAME,
-    ANNOUNCE_CALLBACK,
-    GET_GAME_STATS
+    /** Событие, реагирующее на действия пользователя и администратора: запись, отмена и т.п. */
+    ANNOUNCE_CALLBACK
 }

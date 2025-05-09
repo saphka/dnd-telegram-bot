@@ -61,7 +61,7 @@ public class TelegramUpdateProcessor {
                         .stream()
                         .filter(e -> EntityType.BOTCOMMAND.equals(e.getType())).findFirst();
                 if (command.isPresent()) {
-                    return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.COMMAND_PREFIX + extractCommand(command.get()).toUpperCase(), StateMachineEvents.UNKNOWN);
+                    return getStateMachineEvent(StateMachineEvents.COMMAND_PREFIX + extractCommand(command.get()));
                 }
             } else if (StringUtils.isNotEmpty(message.getText())) {
                 return StateMachineEvents.TEXT_INPUT;
@@ -69,7 +69,7 @@ public class TelegramUpdateProcessor {
         } else if (update.hasCallbackQuery()) {
             var query = update.getCallbackQuery();
             String[] split = query.getData().split("\\" + CallbackConstants.CALLBACK_SEPARATOR, 2);
-            return EnumUtils.getEnum(StateMachineEvents.class, StateMachineEvents.CALLBACK_PREFIX + split[0].toUpperCase(), StateMachineEvents.UNKNOWN);
+            return getStateMachineEvent(StateMachineEvents.CALLBACK_PREFIX + split[0]);
         }
         return StateMachineEvents.UNKNOWN;
     }
@@ -83,5 +83,12 @@ public class TelegramUpdateProcessor {
         return commandTest;
     }
 
+    private StateMachineEvents getStateMachineEvent(final String stringCommand) {
+        return EnumUtils.getEnum(
+                StateMachineEvents.class,
+                StateMachineEvents.getStateEventByCommand(stringCommand).toString(),
+                StateMachineEvents.UNKNOWN
+        );
+    }
 
 }

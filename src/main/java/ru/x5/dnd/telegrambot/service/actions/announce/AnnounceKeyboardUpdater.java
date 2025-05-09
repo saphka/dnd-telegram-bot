@@ -1,4 +1,4 @@
-package ru.x5.dnd.telegrambot.service.actions;
+package ru.x5.dnd.telegrambot.service.actions.announce;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,6 @@ public class AnnounceKeyboardUpdater {
         editKeyboard.setReplyMarkup(keyboard);
         telegramService.execute(editKeyboard);
     }
-
 
     private InlineKeyboardMarkup constructInlineKeyboardMarkup(GameStatus gameStatus, Integer currentPlayers, Integer maxPlayers) {
         if (GameStatus.CANCELLED.equals(gameStatus)) {

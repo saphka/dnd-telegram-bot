@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.x5.dnd.telegrambot.config.BotProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,11 +24,15 @@ public class GreetMemberService {
     public static final int GREETING_DELAY = 30000;
     private final TelegramService telegramService;
     private final MessageSource messageSource;
+    private final BotProperties botProperties;
     private final Map<Long, Set<String>> greetings = new ConcurrentHashMap<>();
 
-    public GreetMemberService(TelegramService telegramService, MessageSource messageSource) {
+    public GreetMemberService(TelegramService telegramService,
+                              MessageSource messageSource,
+                              BotProperties botProperties) {
         this.telegramService = telegramService;
         this.messageSource = messageSource;
+        this.botProperties = botProperties;
     }
 
     public void greet(Long chatId, List<User> users) {
@@ -63,7 +68,11 @@ public class GreetMemberService {
     private void greetByChatId(Long chatId, Set<String> users) throws TelegramApiException {
         var msg = new SendMessage();
         msg.setChatId(chatId);
-        msg.setText(messageSource.getMessage("greeting.new-member", new Object[]{formatMembers(users)}, Locale.getDefault()));
+        msg.setText(messageSource.getMessage(
+                "greeting.new-member",
+                new Object[]{ formatMembers(users), botProperties.username() },
+                Locale.getDefault())
+        );
         msg.setParseMode(ParseMode.HTML);
         telegramService.execute(msg);
     }
